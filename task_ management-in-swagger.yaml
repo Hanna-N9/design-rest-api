@@ -1,0 +1,768 @@
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: Designing the REST API for a Task Management Application
+  contact:
+    email: apiteam@swagger.io
+host: api.tasks.testsite01.com
+basePath: /
+schemes:
+  - https
+paths:
+  /users:
+    post:
+      tags:
+        - "users"
+      summary: "Create a new user"
+      operationId: "createUser"
+      parameters:
+        - in: "body"
+          name: "user"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        "200":
+          description: "Ok: Returns records & identifier in the body of response"
+          schema:
+            $ref: "#/definitions/User"
+        "400":
+          description: "Bad Request: Missing required information"
+          schema:
+            $ref: "#/definitions/Missing-BadRequest"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "409":
+          description: "Conflict: An error of trying to duplicate records"
+          schema:
+            $ref: "#/definitions/PostConflict"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    get:
+      tags:
+        - "users"
+      summary: "List all users"
+      operationId: "getUser"
+      responses:
+        "200":
+          description: "Ok: Returns array of the list of the users in the JSON format"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: “users” request does not exist"
+          schema:
+            $ref: "#/definitions/UserNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    put:
+      tags:
+        - "users"
+      summary: "Update a user"
+      operationId: "updateUser"
+      responses:
+        "405":
+          description: "Method Not Allowed: Can’t update a user without knowing their identifier"
+          schema:
+            $ref: "#/definitions/UserPutNotAllowed"
+    delete:
+      tags:
+        - "users"
+      summary: "Delete a user"
+      operationId: "deleteUser"
+      responses:
+        "405":
+          description: "Method Not Allowed: Can’t delete a user without knowing their identifier"
+          schema:
+            $ref: "#/definitions/UserDeleteNotAllowed"
+  /users/{userid}:
+    post:
+      tags:
+        - "users"
+      summary: "Add a user by user id"
+      operationId: "addUserById"
+      parameters:
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "405":
+          description: "Method Not Allowed: Can't recreate user again as identifier exists"
+          schema:
+            $ref: "#/definitions/UserIdPostNotAllowed"
+    get:
+      tags:
+        - "users"
+      summary: "Get a user by user id"
+      operationId: "getUserById"
+      parameters:
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: JSON for a single user"
+          schema:
+            $ref: "#/definitions/User"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: Valid user id does not exist"
+          schema:
+            $ref: "#/definitions/UserIdNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    put:
+      tags:
+        - "users"
+      summary: "Update a user by user id"
+      operationId: "updateUserById"
+      parameters:
+        - in: "body"
+          name: "user"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: JSON with user data"
+          schema:
+            $ref: "#/definitions/User"
+        "400":
+          description: "Bad Request: User id must be an integer"
+          schema:
+            $ref: "#/definitions/UserIdBadRequest"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: Valid user id does not exist"
+          schema:
+            $ref: "#/definitions/UserIdNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    delete:
+      tags:
+        - "users"
+      summary: "Delete a user by user id"
+      operationId: "deleteUserById"
+      parameters:
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: Returns empty"
+          schema:
+            $ref: "#/definitions/EmptyData"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: Valid user id does not exist"
+          schema:
+            $ref: "#/definitions/UserIdNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+  /users/{userid}/tasks/:
+    post:
+      tags:
+        - "tasks"
+      summary: "Create a new task"
+      operationId: "createTask"
+      parameters:
+        - in: "body"
+          name: "tasks"
+          required: true
+          schema:
+            $ref: "#/definitions/Task"
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: Returns records & identifier in the body of response"
+          schema:
+            $ref: "#/definitions/Task"
+        "400":
+          description: "Bad Request: Missing required information"
+          schema:
+            $ref: "#/definitions/Missing-BadRequest"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "409":
+          description: "Conflict: An error of trying to duplicate records"
+          schema:
+            $ref: "#/definitions/PostConflict"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    get:
+      tags:
+        - "tasks"
+      summary: "List all tasks"
+      operationId: "getTask"
+      parameters:
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: Returns array of the list of the tasks in the JSON format"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Task"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: “tasks” request does not exist"
+          schema:
+            $ref: "#/definitions/TaskNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    put:
+      tags:
+        - "tasks"
+      summary: "Update a task"
+      operationId: "updateTask"
+      parameters:
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "405":
+          description: "Method Not Allowed: Can’t update a task without knowing their identifier"
+          schema:
+            $ref: "#/definitions/TaskPutNotAllowed"
+    delete:
+      tags:
+        - "tasks"
+      summary: "Delete a task"
+      operationId: "deleteTask"
+      parameters:
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "405":
+          description: "Method Not Allowed: Can’t delete a task without knowing their identifier"
+          schema:
+            $ref: "#/definitions/TaskDeleteNotAllowed"
+
+  /users/{userid}/tasks/{taskid}:
+    post:
+      tags:
+        - "tasks"
+      summary: "Add a task by task id"
+      operationId: "addTaskById"
+      parameters:
+        - in: "path"
+          name: "taskid"
+          required: true
+          type: "integer"
+          format: "int32"
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "405":
+          description: "Method Not Allowed: Can't recreate task again as identifier exists"
+          schema:
+            $ref: "#/definitions/TaskIdPostNotAllowed"
+    get:
+      tags:
+        - "tasks"
+      summary: "Get a task by task id"
+      operationId: "getTaskById"
+      parameters:
+        - in: "path"
+          name: "taskid"
+          required: true
+          type: "integer"
+          format: "int32"
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: JSON for a single task"
+          schema:
+            $ref: "#/definitions/Task"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: Valid task id does not exist"
+          schema:
+            $ref: "#/definitions/TaskIdNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    put:
+      tags:
+        - "tasks"
+      summary: "Update a task by task id"
+      operationId: "updateTaskById"
+      parameters:
+        - in: "body"
+          name: "task"
+          required: true
+          schema:
+            $ref: "#/definitions/Task"
+        - in: "path"
+          name: "taskid"
+          required: true
+          type: "integer"
+          format: "int32"
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: JSON with task data"
+          schema:
+            $ref: "#/definitions/Task"
+        "400":
+          description: "Bad Request: Task id must be an integer"
+          schema:
+            $ref: "#/definitions/TaskIdBadRequest"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: Valid task id does not exist"
+          schema:
+            $ref: "#/definitions/TaskIdNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+    delete:
+      tags:
+        - "tasks"
+      summary: "Delete a task by task id"
+      operationId: "deleteTaskById"
+      parameters:
+        - in: "path"
+          name: "taskid"
+          required: true
+          type: "integer"
+          format: "int32"
+        - in: "path"
+          name: "userid"
+          required: true
+          type: "integer"
+          format: "int32"
+      responses:
+        "200":
+          description: "Ok: Returns empty"
+          schema:
+            $ref: "#/definitions/EmptyData"
+        "401":
+          description: "Unauthorized: User must be authenticated"
+          schema:
+            $ref: "#/definitions/Unauthorized"
+        "403":
+          description: "Forbidden: User does not have access/authorize rights to this operation"
+          schema:
+            $ref: "#/definitions/Forbidden"
+        "404":
+          description: "Not Found: Valid task id does not exist"
+          schema:
+            $ref: "#/definitions/TaskIdNotFound"
+        "500":
+          description: "Internal Server Error: Something is wrong on the server side"
+          schema:
+            $ref: "#/definitions/ServerError"
+            ############ Definitions path ############
+definitions:
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int32" #32-bit integers (commonly used integer type)
+      userName:
+        type: "string"
+        format: "string"
+      firstName:
+        type: "string"
+        format: "string"
+      lastName:
+        type: "string"
+        format: "string"
+      email:
+        type: "string"
+        format: "string"
+  Task:
+    type: "object"
+    properties:
+      taskId:
+        type: "integer"
+        format: "int32"
+      title:
+        type: "string"
+      description:
+        type: "string"
+      createdData:
+        type: "string"
+        format: "date"
+      dueData:
+        type: "string"
+        format: "date"
+      status:
+        type: "string"
+      userId:
+        type: "integer"
+        format: "int32"
+  EmptyData:
+    type:
+      "object"
+      ############ Schema for error response body ############
+  Missing-BadRequest:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 400
+      response:
+        type: "string"
+        format: "string"
+        example: "Bad Request"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Missing required information"
+  UserIdBadRequest:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 400
+      response:
+        type: "string"
+        format: "string"
+        example: "Bad Request"
+      error message:
+        type: "string"
+        format: "string"
+        example: "User id must be an integer"
+  TaskIdBadRequest:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 400
+      response:
+        type: "string"
+        format: "string"
+        example: "Bad Request"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Task id must be an integer"
+  Unauthorized:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 401
+      response:
+        type: "string"
+        format: "string"
+        example: "Unauthorized"
+      error message:
+        type: "string"
+        format: "string"
+        example: "User must be authenticated"
+  Forbidden:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 403
+      response:
+        type: "string"
+        format: "string"
+        example: "Forbidden"
+      error message:
+        type: "string"
+        format: "string"
+        example: "User does not have access/authorize rights to this operation"
+  UserNotFound:
+    type: object
+    properties:
+      status code:
+        type: integer
+        format: "integer"
+        example: 404
+      response:
+        type: "string"
+        format: "string"
+        example: "Not Found"
+      error message:
+        type: "string"
+        format: "string"
+        example: "'users' request does not exist"
+  TaskNotFound:
+    type: object
+    properties:
+      status code:
+        type: integer
+        format: "integer"
+        example: 404
+      response:
+        type: "string"
+        format: "string"
+        example: "Not Found"
+      error message:
+        type: "string"
+        format: "string"
+        example: "'tasks' request does not exist"
+  UserIdNotFound:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 404
+      response:
+        type: "string"
+        format: "string"
+        example: "Not Found"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Valid user id does not exist"
+  TaskIdNotFound:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 404
+      response:
+        type: "string"
+        format: "string"
+        example: "Not Found"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Valid task id does not exist"
+  UserPutNotAllowed:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 405
+      response:
+        type: "string"
+        format: "string"
+        example: "Method Not Allowed"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Can’t update a user without knowing their identifier"
+  UserDeleteNotAllowed:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 405
+      response:
+        type: "string"
+        format: "string"
+        example: "Method Not Allowed"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Can’t delete a user without knowing their identifier"
+  TaskPutNotAllowed:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 405
+      response:
+        type: "string"
+        format: "string"
+        example: "Method Not Allowed"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Can’t update a task without knowing their identifier"
+  TaskDeleteNotAllowed:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 405
+      response:
+        type: "string"
+        format: "string"
+        example: "Method Not Allowed"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Can’t delete a task without knowing their identifier"
+  TaskIdPostNotAllowed:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 405
+      response:
+        type: "string"
+        format: "string"
+        example: "Method Not Allowed"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Can't recreate task again as identifier exists"
+  UserIdPostNotAllowed:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 405
+      response:
+        type: "string"
+        format: "string"
+        example: "Method Not Allowed"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Can't recreate user again as identifier exists"
+  PostConflict:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 409
+      response:
+        type: "string"
+        format: "string"
+        example: "Conflict"
+      error message:
+        type: "string"
+        example: "An error of trying to duplicate records"
+  ServerError:
+    type: object
+    properties:
+      status code:
+        type: "integer"
+        format: "integer"
+        example: 500
+      response:
+        type: "string"
+        format: "string"
+        example: "Internal Server Error"
+      error message:
+        type: "string"
+        format: "string"
+        example: "Something is wrong on the server side"
